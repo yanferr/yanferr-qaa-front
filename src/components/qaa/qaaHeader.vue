@@ -4,7 +4,7 @@
         .header-row-hover:hover { color: white; }
         el-row style="color:#b2bebb;"
     -->
-    <el-header style="text-align: left;height: 50px;padding:0;background-color:#ffffff">
+    <el-header>
         <el-row style="color:#5c5c63;font-size:medium;line-height: 50px;">
             <el-col :span="4"></el-col>
             <el-col :span="1">
@@ -39,18 +39,20 @@
 </script>
 <style>
 .el-header {
+    text-align: left;
+    height: 50px;
+    padding: 0;
+    background-color: #ffffff;
+    
     position: fixed;
     left: 0;
     top: 0;
     right: 0;
     z-index: 999999;
     /* 阴影 */
-    box-shadow: 0px 0.5px 4px rgba(0, 0, 0, 0.2),0px 0px 50px rgb(255, 255, 255) inset;
+    box-shadow: 0px 0.5px 4px rgba(0, 0, 0, 0.2), 0px 0px 50px rgb(255, 255, 255) inset;
 }
-
-
 .header-row-hover:hover {
     color: black;
     cursor: pointer;
-}
-</style>
+}</style>
