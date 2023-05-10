@@ -15,7 +15,9 @@ import QaaFooter from './components/qaa/qaaFooter.vue'
         <el-col :span="12">
           <QuesTable />
         </el-col>
-        <el-col :span="4"></el-col>
+        <el-col :span="4">
+        
+        </el-col>
         <el-col :span="4"></el-col>
       </el-row>
     </el-main>
