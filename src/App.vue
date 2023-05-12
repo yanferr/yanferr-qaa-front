@@ -9,16 +9,16 @@ import QaaFooter from './components/qaa/qaaFooter.vue'
 
     <QAAHeader />
 
-    <el-main style="--el-main-padding:0px;width: 200%;">
+    <el-main style="--el-main-padding:0px">
       <el-row class="row-bg table-div" justify="center">
-        <el-col :span="4"></el-col>
-        <el-col :span="12">
+        <el-col :xs="0" :sm="0" :md="1" :lg="4" :xl="4"></el-col>
+        <el-col :xs="21" :sm="21" :md="20" :lg="12" :xl="12">
           <QuesTable />
         </el-col>
-        <el-col :span="4">
+        <el-col :xs="3" :sm="3" :md="2" :lg="4" :xl="4">
         
         </el-col>
-        <el-col :span="4"></el-col>
+        <el-col :xs="0" :sm="0" :md="1" :lg="4" :xl="4"></el-col>
       </el-row>
     </el-main>
     

@@ -6,19 +6,20 @@
     -->
     <el-header>
         <el-row style="color:#5c5c63;font-size:medium;line-height: 50px;">
-            <el-col :span="4"></el-col>
-            <el-col :span="1">
+            <el-col :xs="0" :sm="0" :md="1" :lg="4" :xl="4"></el-col>
+            <!-- <el-col :span="1">
+                
+            </el-col> -->
+            <el-col :xs="21" :sm="21" :md="20" :lg="12" :xl="12">
                 <span><img style="height: 30px;transform:translate(20%,24%);" src="@/assets/pic/yanferr.png" /></span>
-            </el-col>
-            <el-col :span="11">
-                <span class="header-row-hover" style="">学习</span>
+                <span class="header-row-hover" style="margin-left:30px">学习</span>
                 <span class="header-row-hover" style="margin-left:30px">题库</span>
                 <span class="header-row-hover" style="margin-left:30px">竞赛</span>
                 <span class="header-row-hover" style="margin-left:30px">讨论</span>
                 <span class="header-row-hover" style="margin-left:30px">求职</span>
                 <span class="header-row-hover" style="margin-left:30px">商店</span>
             </el-col>
-            <el-col :span="4">
+            <el-col :xs="3" :sm="3" :md="2" :lg="4" :xl="4">
                 <div style="float:right;margin-left:30px">
                     <el-avatar class="header-row-hover" size="small" style="transform:translate(0%,20%);"
                         src="src\\assets\\pic\\touxiang.png" />
@@ -31,7 +32,7 @@
                 </div>
             </el-col>
 
-            <el-col :span="4"></el-col>
+            <el-col :xs="0" :sm="0" :md="1" :lg="4" :xl="4"></el-col>
         </el-row>
     </el-header>
 </template>
