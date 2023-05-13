@@ -1,33 +1,20 @@
 
 <template>
-    <el-select v-model="value" class="m-2" placeholder="难度" style="width:75px;margin: 10px 0 10px 0">
-        <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
-    </el-select>
-    <el-select v-model="value" class="m-2" placeholder="时间" style="margin: 10px 0 10px 10px;width:75px">
-        <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
-    </el-select>
-    <el-select v-model="value" class="m-2" placeholder="标签" style="margin: 10px 0 10px 10px; width:75px">
-        <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
-    </el-select>
-    <el-input style="margin: 10px 0 10px 10px; width:200px" v-model="input2" class="w-50 m-2" placeholder="搜索题目内容或关键词"
-        :prefix-icon="Search" />
-    <div class="cell-hover" style="float:right;margin:10px 0 10px 0; line-height: 35px;font-size:medium;">
-        <img src="../../assets/pic/suiji.png" style="border-radius: 50%;width:20px;height: 20px;transform:translate(-20%,20%);"/>
-        
-        <span style="text-align: center;display: inline;">随机一问</span>
-    </div>
     
+    <QuesTableBar/>
 
-
-    <el-table :data="data.tableData" :row-key="quesId" stripe max-height="700px">
-        <el-table-column label="状态" sortable width="90px">
+    <el-table size="default" :data="data.tableData" :row-key="quesId" stripe max-height="700px">
+        <el-table-column label="状态" width="90px">
             <template #default="scope">
-                <img v-if="scope.row.highLight != -1" :src="scope.row.imgPath" alt=""
-                    style="width: 23px;height: 21px;transform:translate(20%,20%);">
+                <span v-if="scope.row.statusImgPath != 'null'">
+                    <img :src="scope.row.statusImgPath" alt=""
+                        style="width: 18px;height: 18px;transform:translate(20%,20%);" />
+                </span>
+                <span style="width: 23px;height: 21px;" v-else></span>
             </template>
         </el-table-column>
 
-        <el-table-column :show-overflow-tooltip="true" label="问题" prop="ques" min-width="100px">
+        <el-table-column :show-overflow-tooltip="true" label="问题" prop="ques" min-width="120px">
             <template #default="scope">
                 <div style="overflow: hidden;white-space: nowrap;text-overflow: ellipsis;" class="cell-hover">
                     {{ scope.row.ques }}
@@ -35,24 +22,29 @@
             </template>
         </el-table-column>
 
-        <el-table-column :show-overflow-tooltip="true" sortable prop="createTime" label="提醒" />
+        <el-table-column :show-overflow-tooltip="true" sortable prop="reviewOn" label="提醒" :formatter="dateFormat"
+            width="110px" />
 
         <el-table-column label="溯源" sortable width="90px">
             <template #default="scope">
-                <div @click="clickSource(scope.row.sourceUrl)" class="cell-hover">{{ scope.row.source }}</div>
+                <div class="cell-hover">
+                    <span @click="clickSource(scope.row.sourceUrl)" v-show="scope.row.source !== undefined">{{
+                        scope.row.source }}</span>
+                    <span v-show="scope.row.source === null">--</span>
+                </div>
             </template>
         </el-table-column>
 
         <!-- <el-table-column show-overflow-tooltip="true" prop="source" label="周期" width="90" /> -->
         <el-table-column sortable label="通过率" width="90px">
             <template #default="scope">
-                <div v-show="scope.row.highLight >= 1">
+                <div v-if="scope.row.status > 1">
                     <span class="cell-hover">√</span>
                     or
                     <span class="cell-hover">×</span>
                 </div>
-                <div v-show="scope.row.highLight < 1">
-                    --
+                <div v-else>
+                    {{ scope.row.passRate }}
                 </div>
             </template>
         </el-table-column>
@@ -76,7 +68,7 @@
         </el-table-column>
         <el-table-column sortable prop="memoryLevel" label="进度">
             <template #default="scope">
-                <el-progress :percentage="scope.row.memoryLevel / 13 * 100" :show-text="false" status="warning"
+                <el-progress :percentage="scope.row.memoryLevel / 9 * 100" :show-text="false" status="warning"
                     :stroke-width="8" />
             </template>
 
@@ -89,6 +81,7 @@
 import { ref, unref, reactive, onMounted } from 'vue'
 import { service } from "../../request/index"
 import { Search } from '@element-plus/icons-vue'
+import QuesTableBar from './quesTableBar.vue'
 
 let data = reactive({
     tableData: [],
@@ -109,7 +102,9 @@ const pageChange = (p: number) => {
     // 发起接口请求数据 , 请求参数中使用 currentPage.value 作为查询当前页码
     loadData(pagination.page, pagination.limit);
 }
-
+function dateFormat(row) {
+    return row.reviewOn.substring(5);
+}
 function loadData(page: number, limit: number) {
     service.get("qa/ques/list", { params: { page: pagination.page, limit: pagination.limit } }).then((res) => {
         // tableData.value=res;
@@ -118,21 +113,22 @@ function loadData(page: number, limit: number) {
         pagination.total = res.data.page.totalCount;
         pagination.totalPage = res.data.page.totalPage;
         data.tableData = res.data.page.list;
-        getImgPath();
+        getStatusImgPath();
     }).catch(e => { })
 }
 
 function getStatusImgPath() {
-    // for (var i = 0; i < data.tableData.length; i++) {
-    //     data.tableData[i].imgPath = `./src/assets/pic/lv/lv${data.tableData[i].memoryLevel}.png`;
-    // }
-}
-
-function getImgPath() {
     for (var i = 0; i < data.tableData.length; i++) {
-        data.tableData[i].imgPath = `./src/assets/pic/lv/lv${data.tableData[i].memoryLevel}.png`;
+        if (data.tableData[i].status === 1) {
+            data.tableData[i].statusImgPath = `./src/assets/pic/status/status1.png`;
+        } else if (data.tableData[i].status === 2 || (data.tableData[i].status === 3)) {
+            data.tableData[i].statusImgPath = `./src/assets/pic/status/status2.png`;
+        } else { // 一天内提醒
+            data.tableData[i].statusImgPath = "null";
+        }
     }
 }
+
 
 function clickSource(url) {
     window.open(url, '_blank');
