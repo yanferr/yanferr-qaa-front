@@ -1,8 +1,10 @@
 import axios from 'axios'
+import mitt from 'mitt'
 import {
     ElLoading
 } from 'element-plus'
-
+// 导出mitt
+export const bus = mitt()
 
 
 //export将service传出去
@@ -55,13 +57,13 @@ service.interceptors.response.use(
             console.log(res.status)
             console.log('这里是请求成功后')
             //查询成功，关闭模态化窗体
-            ElLoading.service().close()
+            // ElLoading.service().close()
 
             return res;
         } else {
             console.log(res.status)
             console.log('这里是请求失败后')
-            ElLoading.service().close()
+            // ElLoading.service().close()
 
             return res;
         }

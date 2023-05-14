@@ -1,8 +1,6 @@
 
 <template>
-    
-    <QuesTableBar/>
-
+    <QuesTableBar />
     <el-table size="default" :data="data.tableData" :row-key="quesId" stripe max-height="700px">
         <el-table-column label="状态" width="90px">
             <template #default="scope">
@@ -16,7 +14,7 @@
 
         <el-table-column :show-overflow-tooltip="true" label="问题" prop="ques" min-width="120px">
             <template #default="scope">
-                <div style="overflow: hidden;white-space: nowrap;text-overflow: ellipsis;" class="cell-hover">
+                <div @click="edit(scope.row)" style="overflow: hidden;white-space: nowrap;text-overflow: ellipsis;" class="cell-hover">
                     {{ scope.row.ques }}
                 </div>
             </template>
@@ -30,7 +28,19 @@
                 <div class="cell-hover">
                     <span @click="clickSource(scope.row.sourceUrl)" v-show="scope.row.source !== undefined">{{
                         scope.row.source }}</span>
-                    <span v-show="scope.row.source === null">--</span>
+
+                    <el-popover :visible="sourcePopover" placement="bottom" :hide-after="0" :width="200" trigger="click"
+                        content="this is content, this is content, this is content">
+                        <template #reference>
+                            <span v-show="scope.row.source === null">--</span>
+                        </template>
+                        <div>
+                            <el-input v-model="data.qa.source" placeholder="来源名称" />
+                            <el-input v-model="data.qa.sourceUrl" style="margin-top: 10px;" placeholder="输入对应的url" />
+                            <el-button @click="setSource(scope.row)" style="margin-top: 10px;float:right">确定</el-button>
+                        </div>
+                    </el-popover>
+
                 </div>
             </template>
         </el-table-column>
@@ -39,9 +49,9 @@
         <el-table-column sortable label="通过率" width="90px">
             <template #default="scope">
                 <div v-if="scope.row.status > 1">
-                    <span class="cell-hover">√</span>
+                    <span @click="remember(scope.row, true)" class="cell-hover">√</span>
                     or
-                    <span class="cell-hover">×</span>
+                    <span @click="remember(scope.row, false)" class="cell-hover">×</span>
                 </div>
                 <div v-else>
                     {{ scope.row.passRate }}
@@ -51,18 +61,31 @@
         <el-table-column sortable prop="source" label="难度" width="90px">
             <template #default="scope">
 
-                <el-popover placement="bottom" :hide-after="0" :width="130" trigger="click"
+                <el-popover :visible="difficultyPopover" placement="bottom" :hide-after="0" :width="130" trigger="hover"
                     content="this is content, this is content, this is content">
                     <template #reference>
                         <div class="cell-hover">
-                            未知
+                            <span v-if="scope.row.difficulty === null">
+                                未知
+                            </span>
                         </div>
                     </template>
                     <div>
-                        <el-rate v-model="rate" :colors="{ 1: '#99A9BF', 2: '#F7BA2A', 3: '#FF9900' }" :max="3" show-text
+                        <el-rate v-model="data.qa.difficulty" @change="setDifficulty(scope.row)"
+                            :colors="{ 1: '#99A9BF', 2: '#F7BA2A', 3: '#FF9900' }" :max="3" show-text
                             :texts="['简单', '中等', '困难']" />
                     </div>
                 </el-popover>
+                <span v-if="scope.row.difficulty === '1'" style="color:#00af9b">
+                    简单
+                </span>
+                <span v-if="scope.row.difficulty === '2'" style="color:#feb700">
+                    中等
+                </span>
+                <span v-if="scope.row.difficulty === '3'" style="color:#ff2d55">
+                    困难
+                </span>
+
             </template>
 
         </el-table-column>
@@ -74,19 +97,32 @@
 
         </el-table-column>
     </el-table>
+    <!-- 修改对话框 -->
+    <QaDialog/>
+    <!-- 分页 -->
     <el-pagination background layout="->,prev, pager, next" style="margin-top:10px" :total="pagination.total"
         :page-count="pagination.totalPage" :current-page="pagination.page" @current-change="pageChange" />
 </template>
 <script lang="ts" setup>
 import { ref, unref, reactive, onMounted } from 'vue'
-import { service } from "../../request/index"
+import { service, bus } from "../../utils"
 import { Search } from '@element-plus/icons-vue'
 import QuesTableBar from './quesTableBar.vue'
+import QaDialog from './qaDialog.vue'
 
 let data = reactive({
-    tableData: [],
+    difficultyPopover: false,
+    sourcePopover: false,
+
+    tableData: [{}],
+    qa: {
+        difficulty: '',
+        source: '',
+        sourceUrl: '',
+    }
 })
 
+// 分页
 let pagination = reactive({
     page: 1, // 当前页
     total: 0, // 总条数
@@ -94,15 +130,46 @@ let pagination = reactive({
     totalPage: 0 // 总页数
 })
 
-let rate = ref(null)
-
-
+// 分页
 const pageChange = (p: number) => {
     pagination.page = p
     // 发起接口请求数据 , 请求参数中使用 currentPage.value 作为查询当前页码
     loadData(pagination.page, pagination.limit);
 }
-function dateFormat(row) {
+
+// 编辑
+function edit(row: object){
+    bus.emit("row",{quesId:row.quesId,answerId:row.answerId});
+}
+
+// 设置溯源信息
+function setSource(row: object) {
+    service.post("qa/ques/update", { quesId: row.quesId, source: data.qa.source, sourceUrl: data.qa.sourceUrl }).then((res) => {
+        data.qa = { difficulty: '', source: '', sourceUrl: '' };
+        loadData(pagination.page, pagination.limit);
+    }).catch(e => { })
+    data.sourcePopover = false;
+}
+
+// 设置难度 
+function setDifficulty(row: object) {
+    service.post("qa/ques/update", { quesId: row.quesId, difficulty: data.qa.difficulty }).then((res) => {
+        data.qa = { difficulty: '', source: '', sourceUrl: '' }
+
+        loadData(pagination.page, pagination.limit);
+    }).catch(e => { })
+    data.difficultyPopover = false;
+}
+
+// 是否还记得
+function remember(row: object, flag: boolean) {
+    console.log(row, flag);
+    service.get("qa/ques/updateLevel", { params: { status: row.status, quesId: row.quesId, flag } }).then((res) => {
+        loadData(pagination.page, pagination.limit);
+    }).catch(e => { })
+}
+
+function dateFormat(row: object) {
     return row.reviewOn.substring(5);
 }
 function loadData(page: number, limit: number) {
@@ -116,6 +183,7 @@ function loadData(page: number, limit: number) {
         getStatusImgPath();
     }).catch(e => { })
 }
+
 
 function getStatusImgPath() {
     for (var i = 0; i < data.tableData.length; i++) {
@@ -133,13 +201,18 @@ function getStatusImgPath() {
 function clickSource(url) {
     window.open(url, '_blank');
 }
-function clickND() { // 点击难度
-    rateDialog.value = true;
-}
+
 
 
 onMounted(() => {
+    bus.on('flush', (flag) => {
+        // console.log("收到了",flag)
+        if (flag) {
+            loadData(pagination.page, pagination.limit);
+        }
+    })
     loadData(pagination.page, pagination.limit);
+
 })
 
 </script>
