@@ -23,7 +23,7 @@
         <el-table-column :show-overflow-tooltip="true" sortable prop="reviewOn" label="提醒" :formatter="dateFormat"
             width="110px" />
 
-        <el-table-column label="溯源" sortable width="90px">
+        <el-table-column label="溯源"  width="90px">
             <template #default="scope">
                 <div class="cell-hover">
                     <span @click="clickSource(scope.row.sourceUrl)" v-show="scope.row.source !== undefined">{{
@@ -61,7 +61,7 @@
         <el-table-column sortable prop="source" label="难度" width="90px">
             <template #default="scope">
 
-                <el-popover :visible="difficultyPopover" placement="bottom" :hide-after="0" :width="130" trigger="hover"
+                <el-popover :visible="difficultyPopover" placement="bottom" :hide-after="0" :width="130" trigger="click"
                     content="this is content, this is content, this is content">
                     <template #reference>
                         <div class="cell-hover">
@@ -82,7 +82,7 @@
                 <span v-if="scope.row.difficulty === '2'" style="color:#feb700">
                     中等
                 </span>
-                <span v-if="scope.row.difficulty === '3'" style="color:#ff2d55">
+                <span v-if="scope.row.difficulty === '3'" style="color:#f3173f">
                     困难
                 </span>
 
@@ -109,17 +109,28 @@ import { service, bus } from "../../utils"
 import { Search } from '@element-plus/icons-vue'
 import QuesTableBar from './quesTableBar.vue'
 import QaDialog from './qaDialog.vue'
+import { ElMessage } from 'element-plus'
+
+// 搜索条件
+let search = reactive({ 
+    labelId: '',
+    content: '',
+    timeInterval: '',
+    difficulty: '',
+    remind: '',
+})
+
 
 let data = reactive({
     difficultyPopover: false,
     sourcePopover: false,
-
     tableData: [{}],
     qa: {
         difficulty: '',
         source: '',
         sourceUrl: '',
-    }
+    },
+    
 })
 
 // 分页
@@ -134,7 +145,7 @@ let pagination = reactive({
 const pageChange = (p: number) => {
     pagination.page = p
     // 发起接口请求数据 , 请求参数中使用 currentPage.value 作为查询当前页码
-    loadData(pagination.page, pagination.limit);
+    loadData();
 }
 
 // 编辑
@@ -144,9 +155,29 @@ function edit(row: object){
 
 // 设置溯源信息
 function setSource(row: object) {
+
+    // 检查是否可以提交
+    if (data.qa.source.trim().length === 0) {
+        ElMessage({
+            message: '来源不能为空！',
+            offset: 60,
+            type: 'warning',
+        })
+        return;
+    }
+    if (data.qa.sourceUrl.trim().length === 0) {
+        ElMessage({
+            center: true,
+            message: '来源地址不能为空！',
+            offset: 60,
+            type: 'warning'
+        });
+        return;
+    }
+
     service.post("qa/ques/update", { quesId: row.quesId, source: data.qa.source, sourceUrl: data.qa.sourceUrl }).then((res) => {
         data.qa = { difficulty: '', source: '', sourceUrl: '' };
-        loadData(pagination.page, pagination.limit);
+        loadData();
     }).catch(e => { })
     data.sourcePopover = false;
 }
@@ -156,7 +187,7 @@ function setDifficulty(row: object) {
     service.post("qa/ques/update", { quesId: row.quesId, difficulty: data.qa.difficulty }).then((res) => {
         data.qa = { difficulty: '', source: '', sourceUrl: '' }
 
-        loadData(pagination.page, pagination.limit);
+        loadData();
     }).catch(e => { })
     data.difficultyPopover = false;
 }
@@ -165,15 +196,16 @@ function setDifficulty(row: object) {
 function remember(row: object, flag: boolean) {
     console.log(row, flag);
     service.get("qa/ques/updateLevel", { params: { status: row.status, quesId: row.quesId, flag } }).then((res) => {
-        loadData(pagination.page, pagination.limit);
+        loadData();
     }).catch(e => { })
 }
 
 function dateFormat(row: object) {
     return row.reviewOn.substring(5);
 }
-function loadData(page: number, limit: number) {
-    service.get("qa/ques/list", { params: { page: pagination.page, limit: pagination.limit } }).then((res) => {
+function loadData() {
+    // page: pagination.page, limit: pagination.limit,
+    service.get("qa/ques/list", { params: {...pagination,...search} }).then((res) => {
         // tableData.value=res;
         // console.log(res)
         console.log(res.data.page);
@@ -202,17 +234,32 @@ function clickSource(url) {
     window.open(url, '_blank');
 }
 
+function filterTable(){
+    service.get("qa/ques/remindQues").then((res) => {
+        data.tableData = res.data.data;
+        getStatusImgPath();
+    }).catch(e => { })
+}
 
 
 onMounted(() => {
+    
+    loadData();
     bus.on('flush', (flag) => {
         // console.log("收到了",flag)
         if (flag) {
-            loadData(pagination.page, pagination.limit);
+            loadData();
         }
     })
-    loadData(pagination.page, pagination.limit);
-
+    bus.on('filterTable', (flag) => {
+        // 过滤表格
+        filterTable()
+    })
+    bus.on('searchData', (searchObj) => {
+        search = {...search,...searchObj}
+        console.log("条件变啦变啦！！",search);
+        loadData();
+    })
 })
 
 </script>

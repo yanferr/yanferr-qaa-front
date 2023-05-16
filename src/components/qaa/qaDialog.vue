@@ -1,52 +1,53 @@
 <template>
-    <el-dialog :destroy-on-close="true" v-model="data.dialogTableVisible" title="查看&编辑" style="width: 700px;" draggable
+    <el-dialog :destroy-on-close="true" v-model="data.dialogVisible" title="查看&编辑" style="width: 700px;" draggable
         :close-on-click-modal="false">
+        <template #header="{ titleId, titleClass }">
+            <h4 :id="titleId" :class="titleClass">查看&编辑<el-icon @click="data.simplification = !data.simplification"
+                    class="cell-hover" style="margin-left: 20px;">
+                    <More />
+                </el-icon></h4>
+
+        </template>
         <el-form :model="form" label-width="120px">
             <el-form-item label="问题名称">
-                <el-input v-model="form.ques.ques" />
+                <el-input v-model="form.qa.ques.ques" />
             </el-form-item>
             <el-form-item label="所属标签">
-                <el-select :default-first-option="true" v-model="form.optionsValue" multiple filterable allow-create placeholder="选择标签"
-                    autocomplete>
-                    <el-option style="width:100%" v-for="item in form.labels" :key="item.labelId"
-                        :label="item.labelName" :value="item.labelName">
+                <el-select collapse-tags collapse-tags-tooltip :default-first-option="true" v-model="form.optionsValue"
+                    multiple filterable allow-create placeholder="选择标签" autocomplete>
+                    <el-option style="width:100%" v-for="item in form.labels" :key="item.labelId" :label="item.labelName"
+                        :value="item.labelName">
                     </el-option>
                 </el-select>
             </el-form-item>
             <el-form-item label="提醒起止时间" v-show="data.simplification">
-                <el-col :span="11">
-                    <el-date-picker v-model="form.ques.reviewOn" type="date" placeholder="Pick a date"
-                        style="width: 100%" />
-                </el-col>
-                <el-col :span="2" class="text-center">
-                    <span class="text-gray-500">-</span>
-                </el-col>
-                <el-col :span="11">
-                    <el-time-picker v-model="form.ques.delayOn" placeholder="Pick a time" style="width: 100%" />
-                </el-col>
+                    <el-date-picker disabled v-model="timePicker" type="datetimerange" range-separator="至"
+                        start-placeholder="Start date" end-placeholder="End date" />
+              
             </el-form-item>
             <el-form-item label="加入记忆计划" v-show="data.simplification">
                 <el-switch v-model="form.delivery" />
             </el-form-item>
             <el-form-item label="问题难度" v-show="data.simplification">
-                <el-radio-group v-model="form.resource">
-                    <el-radio label="简单" />
-                    <el-radio label="中等" />
-                    <el-radio label="困难" />
+                <el-radio-group v-model="form.qa.ques.difficulty">
+                    <el-radio label="1">简单</el-radio>
+                    <el-radio label="2">中等</el-radio>
+                    <el-radio label="3">困难</el-radio>
                 </el-radio-group>
             </el-form-item>
             <el-form-item label="溯源信息" v-show="data.simplification">
-                <el-input></el-input>
+                <el-input v-model="form.qa.ques.source"></el-input>
             </el-form-item>
             <el-form-item label="溯源地址" v-show="data.simplification">
-                <el-input></el-input>
+                <el-input v-model="form.qa.ques.sourceUrl"></el-input>
             </el-form-item>
             <el-form-item label="问题答案">
-                <el-input :rows="10" v-model="form.answer.answer" type="textarea" />
+                <el-input :rows="10" v-model="form.qa.answer.answer" type="textarea" />
             </el-form-item>
             <el-form-item>
-                <el-button @click="onSubmit">取消</el-button>
-                <el-button type="warning">修改</el-button>
+                <el-button @click="data.dialogVisible = false">取消</el-button>
+                <el-button type="warning" @click="onSubmit">修改</el-button>
+
             </el-form-item>
         </el-form>
     </el-dialog>
@@ -55,8 +56,14 @@
 <script lang="ts" setup>
 import { ref, unref, reactive, onMounted } from 'vue'
 import { service, bus } from "../../utils"
-import { Search, Plus } from '@element-plus/icons-vue'
+import { More, Plus } from '@element-plus/icons-vue'
 import { componentSizeMap, ElMessage } from 'element-plus'
+import func from '../../../vue-temp/vue-editor-bridge'
+
+let timePicker = ref<[Date, Date]>([
+  new Date(2000, 10, 10, 10, 10),
+  new Date(2000, 10, 11, 10, 10),
+])
 
 let submit = reactive({
     quesId: null,
@@ -74,31 +81,70 @@ let submit = reactive({
     difficulty: null,
 })
 
+function changeDate(){
+    console.log(timePicker);
+}
+
+// 表单回显的数据
 let form = reactive({
-    ques: {},
-    answer: {},
-    timePicker: [],
-    optionsValue: [],
-    labels: [],
+    qa: { ques: { ques:'' ,difficulty:'',source:'',sourceUrl:''}, answer: { answerId: '', answer: '' } },
+
+    optionsValue: [], // el-select回显数据
+    labels: [], // el-select 所有数据
 })
 
 // 传递过来的数据
 let data = reactive({
-    dialogTableVisible: false,
+    dialogVisible: false,
     simplification: false,
     qa: { quesId: '', answerId: '' },
 
 })
 
+// 提交
+function onSubmit() {
+    service.post('qa/ques/save', {
+        quesId: data.qa.quesId,
+        ques: form.qa.ques.ques,
+        difficulty: form.qa.ques.difficulty,
+        source: form.qa.ques.source,
+        sourceUrl: form.qa.ques.sourceUrl,
+        answerId: data.qa.answerId,
+        answer: form.qa.answer.answer,
+        labelNames: form.optionsValue,
+    }).then(res => { // 必须要用箭头函数
+        console.log(res);
+        if (res && res.data.code === 0) {
+            ElMessage({
+                message: '修改成功',
+                offset: 60,
+                type: 'success'
+            });
+            bus.emit('flush', true);  // 刷新
+        } else {
+            alert("修改失败")
+        }
+        data.dialogVisible = false;
+    }).catch(function (error) {
+        alert("修改失败")
+    });
+
+    
+}
+
 function initData() {
     service.get(`qa/ques/info/${data.qa.quesId}`).then((res) => {
-        form.ques = res.data.ques;
-        form.ques.timePicker = [res.data.ques.reviewOn, res.data.ques.delayOn]
+        form.qa.ques = res.data.ques;
+        timePicker.value[0]=res.data.ques.reviewOn;
+        timePicker.value[1]=res.data.ques.delayOn;
     }).catch(e => { });
 
     service.get(`qa/answer/info/${data.qa.answerId}`).then((res) => {
-        form.answer = res.data.answer;
+        form.qa.answer = res.data.answer;
     }).catch(e => { })
+
+    lablesWithQuesId();
+    loadLabels();
 }
 
 
@@ -134,10 +180,15 @@ onMounted(() => {
         data.qa.quesId = row.quesId;
         data.qa.answerId = row.answerId;
         initData();
-        lablesWithQuesId();
-        loadLabels();
-        data.dialogTableVisible = true
+        data.dialogVisible = true;
+        // data.simplification = false;
     })
 
 })
 </script>
+<style>
+.cell-hover:hover {
+    color: #007aff;
+    cursor: pointer;
+}
+</style>

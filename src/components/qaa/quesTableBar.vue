@@ -1,22 +1,34 @@
 <template>
-    <el-select clearable v-model="data.search.difficulty" class="m-2" placeholder="难度"
+    <!-- 搜索条件 -->
+    <el-select @change="difficultyChange" clearable v-model="search.difficulty" class="m-2" placeholder="难度"
         style="width:75px;margin: 10px 0 10px 0">
         <el-option v-for="item in data.difficulty" :key="item.value" :label="item.label" :value="item.value" />
     </el-select>
-    <el-select clearable v-model="data.search.timeValue" class="m-2" placeholder="时间"
+    <el-select @change="timeChange" clearable v-model="search.timeInterval" class="m-2" placeholder="时间"
         style="margin: 10px 0 10px 10px;width:75px">
         <el-option v-for="item in data.timeRange" :key="item.value" :label="item.label" :value="item.value" />
     </el-select>
-    <el-select filterable clearable :collapse-tags="true" v-model="data.search.labelName" class="m-2" placeholder="标签"
-        style="margin: 10px 0 10px 10px; width:75px">
-        <el-option v-for="item in data.labels" :key="item.labelId" :label="item.labelName" :value="item.labelName" />
+    <el-select @change="labelChange" filterable clearable :collapse-tags="true" v-model="search.labelId" class="m-2"
+        placeholder="标签" style="margin: 10px 0 10px 10px; width:75px">
+        <el-option v-for="item in data.labels" :key="item.labelId" :label="item.labelName" :value="item.labelId" />
     </el-select>
-    <el-input style="margin: 10px 0 10px 10px; width:200px" placeholder="搜索题目内容或关键词" v-model="data.search.content" class="w-50 m-2"
-        @keyup.esc="esc" @keyup.enter="enter" :prefix-icon="Search" />
-    <!-- 新增 -->
-    <el-button plain type="success" style="margin: 10px 0 10px 10px;" :icon="Plus" round @click="data.dialogVisible = true">新增</el-button>
+    <el-input style="margin: 10px 0 10px 10px; width:200px" placeholder="搜索题目内容或关键词" v-model="search.content"
+        class="w-50 m-2" @keyup.esc="esc" @keyup.enter="enter" :prefix-icon="Search" />
 
-    <!-- 随机一问 -->
+    <!-- 只显示显示提醒问题 -->
+    <img :alt="data.msg" v-show="!search.remind" @click="filterTable" class="cell-hover"
+        src="../../assets/pic/status/status2.png"
+        style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
+    <img :alt="data.msg" v-show="search.remind" @click="filterTable" class="cell-hover"
+        src="../../assets/pic/status/all.png"
+        style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
+
+    <!-- 新增 -->
+    <img @click="data.dialogVisible = true" class="cell-hover" src="../../assets/pic/status/add.png"
+        style="margin: 0 0 0 20px;width:20px;height: 20px;transform:translate(-20%,25%);" />
+
+
+    <!-- 随机一题 -->
     <div style="float:right;margin:10px 0 10px 0; line-height: 35px;font-size:medium;">
         <img class="cell-hover" src="../../assets/pic/suiji.png"
             style="border-radius: 50%;width:20px;height: 20px;transform:translate(-20%,20%);" />
@@ -50,11 +62,18 @@ import { ref, unref, reactive, onMounted } from 'vue'
 import { service, bus } from "../../utils"
 import { Search, Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-
-
+// 搜索条件
+let search = reactive({
+    labelId: '',
+    content: '',
+    timeInterval: '',
+    difficulty: '',
+    remind: false,
+})
+// 新增回显
 let data = reactive({
+    msg: '只显示提醒问题',
     dialogVisible: false,
-    difficultyValue: '',
     difficulty: [{
         label: '简单',
         value: 1
@@ -68,26 +87,42 @@ let data = reactive({
         value: 3
     }
     ],
-    timeValue: '',
     timeRange: [{
         label: '今天',
         value: 1
     }, {
         label: '本周',
-        value: 2
+        value: 7
     }, {
         label: '本月',
-        value: 3
+        value: 30
     }],
-    labels: [{ labelId: 0, labelName: ''}],
-    search: {  // 搜索条件
-        labelName: '',
-        content: '',
-        timeValue: '',
-        difficulty: '',
-    },
+    labels: [{ labelId: 0, labelName: '' }],
     qa: { labelNames: [], ques: '', answer: '' } // 新增
 })
+
+// 点击小闪电
+function filterTable() {
+    search.remind = !search.remind;
+    data.msg = search.remind ? '显示所有问题' : '只显示提醒问题';
+    bus.emit("searchData", { remind: search.remind })
+}
+// 搜索条件变化
+function difficultyChange() {
+    bus.emit("searchData", { difficulty: search.difficulty })
+}
+// 搜索条件变化
+function labelChange() {
+    bus.emit("searchData", { labelId: search.labelId })
+}
+// 搜索条件变化
+function timeChange() {
+    bus.emit("searchData", { timeInterval: search.timeInterval })
+}
+// 搜索条件变化
+function enter() {
+    bus.emit("searchData", { content: search.content })
+}
 
 function submit() {
     // 检查是否可以提交
@@ -121,26 +156,23 @@ function submit() {
                 offset: 60,
                 type: 'success'
             });
-            data.qa = {labelNames: [], ques: '', answer: ''};
-            
+            data.qa = { labelNames: [], ques: '', answer: '' };
+
         } else {
             alert("添加失败")
         }
+        data.dialogVisible = false;
     }).catch(function (error) {
         alert("添加失败")
     });
-    data.dialogVisible=false;
-    bus.emit('flush',true);  // 刷新
+    bus.emit('flush', true);  // 刷新
 }
 
 // 监听搜索框esc按键
 function esc() {
-    data.search.content = '';
+    search.content = '';
 }
-// 监听搜索框enter按键
-function enter() {
-    bus.emit('a', data.search);
-}
+
 function loadLabels() {
     service.get('qa/label/list')
         .then(res => {
