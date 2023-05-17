@@ -11,7 +11,7 @@
                 
             </el-col> -->
             <el-col :xs="21" :sm="21" :md="20" :lg="12" :xl="12">
-                <span><img style="height: 30px;transform:translate(20%,24%);" src="@/assets/pic/yanferr.png" /></span>
+                <span><img style="height: 30px;transform:translate(20%,24%);" src="../../assets/yanferr.png" /></span>
                 <span class="header-row-hover" style="margin-left:30px">学习</span>
                 <span class="header-row-hover" style="margin-left:30px">题库</span>
                 <span class="header-row-hover" style="margin-left:30px">竞赛</span>
@@ -22,12 +22,12 @@
             <el-col :xs="3" :sm="3" :md="2" :lg="4" :xl="4">
                 <div style="float:right;margin-left:30px">
                     <el-avatar class="header-row-hover" size="small" style="transform:translate(0%,20%);"
-                        src="src\\assets\\pic\\touxiang.png" />
+                        src="../../assets/touxiang.png" />
                 </div>
                 <div style="float:right">
                     <el-badge is-dot style="transform:translate(20%,30%);">
                         <span class="header-row-hover"><img style="height: 21px;transform:translate(20%,-56%);"
-                                src="@/assets/pic/tixing.svg" /></span>
+                                src="../../assets/tixing.svg" /></span>
                     </el-badge>
                 </div>
             </el-col>

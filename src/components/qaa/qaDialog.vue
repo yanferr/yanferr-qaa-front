@@ -1,11 +1,21 @@
 <template>
-    <el-dialog :destroy-on-close="true" v-model="data.dialogVisible" title="查看&编辑" style="width: 700px;" draggable
+    <el-dialog  v-model="data.dialogVisible" title="查看&编辑" style="width: 700px;" draggable
         :close-on-click-modal="false">
         <template #header="{ titleId, titleClass }">
-            <h4 :id="titleId" :class="titleClass">查看&编辑<el-icon @click="data.simplification = !data.simplification"
+            <h4 :id="titleId" :class="titleClass">查看&编辑
+                <el-popconfirm confirm-button-text="删除" cancel-button-text="取消" :icon="InfoFilled" icon-color="#626AEF"
+                    title="确定删除吗?" @confirm="deleteOne">
+                    <template #reference>
+                        <el-icon class="cell-hover" style="margin-left: 30px;">
+                            <Delete />
+                        </el-icon>
+                    </template>
+                </el-popconfirm>
+                <el-icon @click="data.simplification = !data.simplification"
                     class="cell-hover" style="margin-left: 20px;">
                     <More />
-                </el-icon></h4>
+                </el-icon>
+            </h4>
 
         </template>
         <el-form :model="form" label-width="120px">
@@ -21,9 +31,9 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="提醒起止时间" v-show="data.simplification">
-                    <el-date-picker disabled v-model="timePicker" type="datetimerange" range-separator="至"
-                        start-placeholder="Start date" end-placeholder="End date" />
-              
+                <el-date-picker disabled v-model="timePicker" type="datetimerange" range-separator="至"
+                    start-placeholder="Start date" end-placeholder="End date" />
+
             </el-form-item>
             <el-form-item label="加入记忆计划" v-show="data.simplification">
                 <el-switch v-model="form.delivery" />
@@ -56,13 +66,13 @@
 <script lang="ts" setup>
 import { ref, unref, reactive, onMounted } from 'vue'
 import { service, bus } from "../../utils"
-import { More, Plus } from '@element-plus/icons-vue'
+import { More, Delete, InfoFilled } from '@element-plus/icons-vue'
 import { componentSizeMap, ElMessage } from 'element-plus'
-import func from '../../../vue-temp/vue-editor-bridge'
+
 
 let timePicker = ref<[Date, Date]>([
-  new Date(2000, 10, 10, 10, 10),
-  new Date(2000, 10, 11, 10, 10),
+    new Date(2000, 10, 10, 10, 10),
+    new Date(2000, 10, 11, 10, 10),
 ])
 
 let submit = reactive({
@@ -81,13 +91,10 @@ let submit = reactive({
     difficulty: null,
 })
 
-function changeDate(){
-    console.log(timePicker);
-}
 
 // 表单回显的数据
 let form = reactive({
-    qa: { ques: { ques:'' ,difficulty:'',source:'',sourceUrl:''}, answer: { answerId: '', answer: '' } },
+    qa: { ques: { ques: '', difficulty: '', source: '', sourceUrl: '' }, answer: { answerId: '', answer: '' } },
 
     optionsValue: [], // el-select回显数据
     labels: [], // el-select 所有数据
@@ -100,6 +107,35 @@ let data = reactive({
     qa: { quesId: '', answerId: '' },
 
 })
+
+// 删除逻辑（单个删除）
+function deleteOne() {
+    service.post("qa/ques/delete",
+        JSON.stringify([data.qa.quesId]), {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(res => {
+            if (res && res.data.code === 0) {
+                bus.emit('flush', true);  // 刷新
+                data.dialogVisible = false;
+                ElMessage({
+                    message: '删除成功！',
+                    offset: 60,
+                    type: 'success',
+                })
+            } else {
+                ElMessage({
+                    message: '操作失败！',
+                    offset: 60,
+                    type: 'error',
+                })
+            };
+        }).catch(function (error) {
+            console.log(error);
+        });
+}
 
 // 提交
 function onSubmit() {
@@ -129,14 +165,14 @@ function onSubmit() {
         alert("修改失败")
     });
 
-    
+
 }
 
 function initData() {
     service.get(`qa/ques/info/${data.qa.quesId}`).then((res) => {
         form.qa.ques = res.data.ques;
-        timePicker.value[0]=res.data.ques.reviewOn;
-        timePicker.value[1]=res.data.ques.delayOn;
+        timePicker.value[0] = res.data.ques.reviewOn;
+        timePicker.value[1] = res.data.ques.delayOn;
     }).catch(e => { });
 
     service.get(`qa/answer/info/${data.qa.answerId}`).then((res) => {
@@ -166,7 +202,7 @@ function lablesWithQuesId() {
 }
 
 function loadLabels() {
-    service.get('qa/label/list')
+    service.get('qa/label/list', { params: { limit: 999 } })
         .then(res => {
             if (res && res.data.code === 0) {
                 form.labels = res.data.page.list;

@@ -10,6 +10,8 @@ export const bus = mitt()
 //export将service传出去
 export const service = axios.create({
     baseURL: 'http://localhost:8080/'
+    // baseURL: 'http://yanferr.com/'
+    
     //baseURL: import.meta.env.VITE_BASE_URL, //这里也可以使用变量
     //timeout: 30000,//超时设置
     //withCredentials: true, //异步请求携带cookie

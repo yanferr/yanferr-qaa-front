@@ -13,24 +13,23 @@
         <el-option v-for="item in data.labels" :key="item.labelId" :label="item.labelName" :value="item.labelId" />
     </el-select>
     <el-input style="margin: 10px 0 10px 10px; width:200px" placeholder="搜索题目内容或关键词" v-model="search.content"
-        class="w-50 m-2" @keyup.esc="esc" @keyup.enter="enter" :prefix-icon="Search" />
+        class="w-50 m-2" @keyup.esc="esc" @change="enter" @input="enter" :prefix-icon="Search" />
 
     <!-- 只显示显示提醒问题 -->
     <img :alt="data.msg" v-show="!search.remind" @click="filterTable" class="cell-hover"
-        src="../../assets/pic/status/status2.png"
+        src="../../assets/status2.png"
         style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
     <img :alt="data.msg" v-show="search.remind" @click="filterTable" class="cell-hover"
-        src="../../assets/pic/status/all.png"
+        src="../../assets/all.png"
         style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
 
     <!-- 新增 -->
-    <img @click="data.dialogVisible = true" class="cell-hover" src="../../assets/pic/status/add.png"
+    <img @click="data.dialogVisible = true" class="cell-hover" src="../../assets/add.png"
         style="margin: 0 0 0 20px;width:20px;height: 20px;transform:translate(-20%,25%);" />
-
 
     <!-- 随机一题 -->
     <div style="float:right;margin:10px 0 10px 0; line-height: 35px;font-size:medium;">
-        <img class="cell-hover" src="../../assets/pic/suiji.png"
+        <img class="cell-hover" src="../../assets/suiji.png"
             style="border-radius: 50%;width:20px;height: 20px;transform:translate(-20%,20%);" />
         <span class="cell-hover" style="text-align: center;display: inline;">随机一问</span>
     </div>
@@ -101,6 +100,11 @@ let data = reactive({
     qa: { labelNames: [], ques: '', answer: '' } // 新增
 })
 
+// 监听搜索框esc按键
+function esc() {
+    search.content = '';
+    bus.emit("searchData", { content: search.content })
+}
 // 点击小闪电
 function filterTable() {
     search.remind = !search.remind;
@@ -157,7 +161,7 @@ function submit() {
                 type: 'success'
             });
             data.qa = { labelNames: [], ques: '', answer: '' };
-
+            bus.emit('flush', true);  // 刷新
         } else {
             alert("添加失败")
         }
@@ -165,16 +169,13 @@ function submit() {
     }).catch(function (error) {
         alert("添加失败")
     });
-    bus.emit('flush', true);  // 刷新
+    
 }
 
-// 监听搜索框esc按键
-function esc() {
-    search.content = '';
-}
+
 
 function loadLabels() {
-    service.get('qa/label/list')
+    service.get('qa/label/list',{params:{limit:999}})
         .then(res => {
             if (res && res.data.code === 0) {
                 data.labels = res.data.page.list;

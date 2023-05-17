@@ -14,7 +14,8 @@
 
         <el-table-column :show-overflow-tooltip="true" label="问题" prop="ques" min-width="120px">
             <template #default="scope">
-                <div @click="edit(scope.row)" style="overflow: hidden;white-space: nowrap;text-overflow: ellipsis;" class="cell-hover">
+                <div @click="edit(scope.row)" style="overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"
+                    class="cell-hover">
                     {{ scope.row.ques }}
                 </div>
             </template>
@@ -23,11 +24,12 @@
         <el-table-column :show-overflow-tooltip="true" sortable prop="reviewOn" label="提醒" :formatter="dateFormat"
             width="110px" />
 
-        <el-table-column label="溯源"  width="90px">
+        <el-table-column label="溯源" width="90px">
             <template #default="scope">
                 <div class="cell-hover">
-                    <span @click="clickSource(scope.row.sourceUrl)" v-show="scope.row.source !== undefined">{{
-                        scope.row.source }}</span>
+                    <span @click="clickSource(scope.row.sourceUrl)" v-show="scope.row.source !== undefined">
+                        {{ scope.row.source }}
+                    </span>
 
                     <el-popover :visible="sourcePopover" placement="bottom" :hide-after="0" :width="200" trigger="click"
                         content="this is content, this is content, this is content">
@@ -98,7 +100,7 @@
         </el-table-column>
     </el-table>
     <!-- 修改对话框 -->
-    <QaDialog/>
+    <QaDialog />
     <!-- 分页 -->
     <el-pagination background layout="->,prev, pager, next" style="margin-top:10px" :total="pagination.total"
         :page-count="pagination.totalPage" :current-page="pagination.page" @current-change="pageChange" />
@@ -112,7 +114,7 @@ import QaDialog from './qaDialog.vue'
 import { ElMessage } from 'element-plus'
 
 // 搜索条件
-let search = reactive({ 
+let search = reactive({
     labelId: '',
     content: '',
     timeInterval: '',
@@ -130,7 +132,7 @@ let data = reactive({
         source: '',
         sourceUrl: '',
     },
-    
+
 })
 
 // 分页
@@ -149,8 +151,8 @@ const pageChange = (p: number) => {
 }
 
 // 编辑
-function edit(row: object){
-    bus.emit("row",{quesId:row.quesId,answerId:row.answerId});
+function edit(row: object) {
+    bus.emit("row", { quesId: row.quesId, answerId: row.answerId });
 }
 
 // 设置溯源信息
@@ -205,7 +207,7 @@ function dateFormat(row: object) {
 }
 function loadData() {
     // page: pagination.page, limit: pagination.limit,
-    service.get("qa/ques/list", { params: {...pagination,...search} }).then((res) => {
+    service.get("qa/ques/list", { params: { ...pagination, ...search } }).then((res) => {
         // tableData.value=res;
         // console.log(res)
         console.log(res.data.page);
@@ -220,9 +222,9 @@ function loadData() {
 function getStatusImgPath() {
     for (var i = 0; i < data.tableData.length; i++) {
         if (data.tableData[i].status === 1) {
-            data.tableData[i].statusImgPath = `./src/assets/pic/status/status1.png`;
+            data.tableData[i].statusImgPath = "../../assets/status1.png";
         } else if (data.tableData[i].status === 2 || (data.tableData[i].status === 3)) {
-            data.tableData[i].statusImgPath = `./src/assets/pic/status/status2.png`;
+            data.tableData[i].statusImgPath = "../../assets/status2.png";
         } else { // 一天内提醒
             data.tableData[i].statusImgPath = "null";
         }
@@ -234,7 +236,7 @@ function clickSource(url) {
     window.open(url, '_blank');
 }
 
-function filterTable(){
+function filterTable() {
     service.get("qa/ques/remindQues").then((res) => {
         data.tableData = res.data.data;
         getStatusImgPath();
@@ -243,7 +245,7 @@ function filterTable(){
 
 
 onMounted(() => {
-    
+
     loadData();
     bus.on('flush', (flag) => {
         // console.log("收到了",flag)
@@ -256,8 +258,8 @@ onMounted(() => {
         filterTable()
     })
     bus.on('searchData', (searchObj) => {
-        search = {...search,...searchObj}
-        console.log("条件变啦变啦！！",search);
+        search = { ...search, ...searchObj }
+        console.log("条件变啦变啦！！", search);
         loadData();
     })
 })
