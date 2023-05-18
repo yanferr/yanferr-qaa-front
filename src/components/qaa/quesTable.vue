@@ -215,7 +215,15 @@ function loadData() {
         pagination.totalPage = res.data.page.totalPage;
         data.tableData = res.data.page.list;
         getStatusImgPath();
+        // 看看有没有提醒的问题
+        lastedReviewOn();
     }).catch(e => { })
+}
+function lastedReviewOn(){
+    service.get("qa/ques/lastedReviewOn").then((res)=>{
+        
+        bus.emit("newRemind",res.data.data);
+    })
 }
 
 

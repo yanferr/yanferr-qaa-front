@@ -15,12 +15,13 @@
     <el-input style="margin: 10px 0 10px 10px; width:200px" placeholder="搜索题目内容或关键词" v-model="search.content"
         class="w-50 m-2" @keyup.esc="esc" @change="enter" @input="enter" :prefix-icon="Search" />
 
-    <!-- 只显示显示提醒问题 -->
-    <img :alt="data.msg" v-show="!search.remind" @click="filterTable" class="cell-hover"
-        src="../../assets/status2.png"
-        style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
-    <img :alt="data.msg" v-show="search.remind" @click="filterTable" class="cell-hover"
-        src="../../assets/all.png"
+    <!-- 只显示提醒问题 -->
+    <img :alt="data.msg" v-show="!data.newRemind && !search.remind" @click="filterTable" class="cell-hover"
+        src="../../assets/status2.png" style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
+    <img :alt="data.msg" v-show="data.newRemind && !search.remind" @click="filterTable" class="cell-hover"
+        src="../../assets/status2_.png" style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
+    <!-- 显示所有问题 -->
+    <img :alt="data.msg" v-show="search.remind" @click="filterTable" class="cell-hover" src="../../assets/all.png"
         style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
 
     <!-- 新增 -->
@@ -71,6 +72,7 @@ let search = reactive({
 })
 // 新增回显
 let data = reactive({
+    newRemind: false,
     msg: '只显示提醒问题',
     dialogVisible: false,
     difficulty: [{
@@ -169,13 +171,13 @@ function submit() {
     }).catch(function (error) {
         alert("添加失败")
     });
-    
+
 }
 
 
 
 function loadLabels() {
-    service.get('qa/label/list',{params:{limit:999}})
+    service.get('qa/label/list', { params: { limit: 999 } })
         .then(res => {
             if (res && res.data.code === 0) {
                 data.labels = res.data.page.list;
@@ -187,6 +189,9 @@ function loadLabels() {
 onMounted(() => {
     // bus.emit('a', a)
     loadLabels();
+    bus.on("newRemind", (flag) => {
+        data.newRemind = flag;
+    })
 })
 
 
@@ -194,5 +199,10 @@ onMounted(() => {
 <style scoped>
 .cell-hover:hover {
     cursor: pointer;
+}
+
+.item {
+    margin-top: 10px;
+    margin-right: 40px;
 }
 </style>
