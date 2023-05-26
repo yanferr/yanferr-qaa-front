@@ -1,26 +1,38 @@
 <!DOCTYPE html>
-<html lang="en" >
-  <head>
-    <meta charset="UTF-8">
-    <link rel="icon" href="assets/yanferr.ico">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>研范 (yanferr) 全球极客挚爱的问题记录平台</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
-  <style>
-    
-    body {
-        margin: 0 auto;
-        /* background-color: #1a1a1a;
-        color:white; */
-    }
-    #app{
-      width: 200%;
-      padding: 0px;
-    }
+<html lang="en">
 
-  </style>
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="assets/yanferr.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>研范 (yanferr) 全球极客挚爱的问题记录平台</title>
+</head>
+
+<body>
+  <div id="app"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+<style>
+  body {
+    margin: 0;
+    /* background-color: #1a1a1a;
+        color:white; */
+    /* 页面滚动条 */
+    /* overflow: auto !important; */
+    height: 100%;
+  }
+
+  #app {
+    padding: 0px;
+    width: 100% ;
+    height: 100%;
+    max-width: 100%;
+
+    /* 开启流式布局 */
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+  }
+</style>
+
 </html>

@@ -1,7 +1,7 @@
 
 <template>
     <QuesTableBar />
-    <el-table size="default" :data="data.tableData" :row-key="quesId" stripe max-height="700px">
+    <el-table size="default" :data="data.tableData" :row-key="quesId" stripe >
         <el-table-column label="状态" width="90px">
             <template #default="scope">
                 <span v-if="scope.row.statusImgPath != 'null'">
@@ -102,8 +102,9 @@
     <!-- 修改对话框 -->
     <QaDialog />
     <!-- 分页 -->
-    <el-pagination background layout="->,prev, pager, next" style="margin-top:10px" :total="pagination.total"
-        :page-count="pagination.totalPage" :current-page="pagination.page" @current-change="pageChange" />
+    <el-pagination background layout="sizes,->,prev, pager, next" style="margin-top:10px" :total="pagination.total"
+        :page-sizes="[20, 40, 60, 100]" :page-count="pagination.totalPage" :current-page="pagination.page" :page-size="pagination.limit"
+        @size-change="handleSizeChange" @current-change="pageChange" />
 </template>
 <script lang="ts" setup>
 import { ref, unref, reactive, onMounted } from 'vue'
@@ -139,7 +140,7 @@ let data = reactive({
 let pagination = reactive({
     page: 1, // 当前页
     total: 0, // 总条数
-    limit: 15, // 每页显示限制
+    limit: 20, // 每页显示限制
     totalPage: 0 // 总页数
 })
 
@@ -147,6 +148,11 @@ let pagination = reactive({
 const pageChange = (p: number) => {
     pagination.page = p
     // 发起接口请求数据 , 请求参数中使用 currentPage.value 作为查询当前页码
+    loadData();
+}
+
+function handleSizeChange(val: number){
+    pagination.limit = val;
     loadData();
 }
 
@@ -279,9 +285,6 @@ onMounted(() => {
     cursor: pointer;
 }
 
-.el-popover.el-popper {
-    min-width: 130px;
-}
 
 /* 评分 */
 .demo-rate-block {
@@ -293,14 +296,4 @@ onMounted(() => {
     box-sizing: border-box;
 }
 
-.demo-rate-block:last-child {
-    border-right: none;
-}
-
-.demo-rate-block .demonstration {
-    display: block;
-    color: var(--el-text-color-secondary);
-    font-size: 14px;
-    margin-bottom: 20px;
-}
 </style>

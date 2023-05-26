@@ -1,60 +1,64 @@
 <template>
-    <!-- 搜索条件 -->
-    <el-select @change="difficultyChange" clearable v-model="search.difficulty" class="m-2" placeholder="难度"
-        style="width:75px;margin: 10px 0 10px 0">
-        <el-option v-for="item in data.difficulty" :key="item.value" :label="item.label" :value="item.value" />
-    </el-select>
-    <el-select @change="timeChange" clearable v-model="search.timeInterval" class="m-2" placeholder="时间"
-        style="margin: 10px 0 10px 10px;width:75px">
-        <el-option v-for="item in data.timeRange" :key="item.value" :label="item.label" :value="item.value" />
-    </el-select>
-    <el-select @change="labelChange" filterable clearable :collapse-tags="true" v-model="search.labelId" class="m-2"
-        placeholder="标签" style="margin: 10px 0 10px 10px; width:75px">
-        <el-option v-for="item in data.labels" :key="item.labelId" :label="item.labelName" :value="item.labelId" />
-    </el-select>
-    <el-input style="margin: 10px 0 10px 10px; width:200px" placeholder="搜索题目内容或关键词" v-model="search.content"
-        class="w-50 m-2" @keyup.esc="esc" @change="enter" @input="enter" :prefix-icon="Search" />
-
-    <!-- 只显示提醒问题 -->
-    <img :alt="data.msg" v-show="!data.newRemind && !search.remind" @click="filterTable" class="cell-hover"
-        src="../../assets/status2.png" style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
-    <img :alt="data.msg" v-show="data.newRemind && !search.remind" @click="filterTable" class="cell-hover"
-        src="../../assets/status2_.png" style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
-    <!-- 显示所有问题 -->
-    <img :alt="data.msg" v-show="search.remind" @click="filterTable" class="cell-hover" src="../../assets/all.png"
-        style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
-
-    <!-- 新增 -->
-    <img @click="data.dialogVisible = true" class="cell-hover" src="../../assets/add.png"
-        style="margin: 0 0 0 20px;width:20px;height: 20px;transform:translate(-20%,25%);" />
-
-    <!-- 随机一题 -->
-    <div style="float:right;margin:10px 0 10px 0; line-height: 35px;font-size:medium;">
-        <img class="cell-hover" src="../../assets/suiji.png"
-            style="border-radius: 50%;width:20px;height: 20px;transform:translate(-20%,20%);" />
-        <span class="cell-hover" style="text-align: center;display: inline;">随机一问</span>
-    </div>
-
-    <!-- 新增表单 -->
-    <el-dialog draggable :close-on-click-modal="false" v-model="data.dialogVisible" title="新增问题" center width="30%">
-        <el-input placeholder="输入问题" v-model="data.qa.ques"></el-input>
-        <el-select collapse-tags collapse-tags-tooltip :popper-append-to-body="false" :default-first-option="true"
-            v-model="data.qa.labelNames" multiple filterable allow-create placeholder="选择标签" autocomplete
-            style="margin-top: 40px;">
-            <el-option v-for="item in data.labels" :key="item.labelId" :label="item.labelName" :value="item.labelName">
-            </el-option>
+    <div class="div-bar">
+        <!-- 搜索条件 -->
+        <el-select @change="difficultyChange" clearable v-model="search.difficulty" class="m-2" placeholder="难度"
+            style="width:75px;margin: 10px 0 10px 0">
+            <el-option v-for="item in data.difficulty" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
-        <el-input :rows="10" type="textarea" placeholder="输入答案" v-model="data.qa.answer" style="margin-top: 40px;">
-        </el-input>
-        <template #footer>
-            <span class="dialog-footer">
-                <el-button @click="data.dialogVisible = false">取消</el-button>
-                <el-button type="primary" @click="submit">
-                    确定
-                </el-button>
-            </span>
-        </template>
-    </el-dialog>
+        <el-select @change="timeChange" clearable v-model="search.timeInterval" class="m-2" placeholder="时间"
+            style="margin: 10px 0 10px 10px;width:75px">
+            <el-option v-for="item in data.timeRange" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
+        <el-select @change="labelChange" filterable clearable :collapse-tags="true" v-model="search.labelId" class="m-2"
+            placeholder="标签" style="margin: 10px 0 10px 10px; width:75px">
+            <el-option v-for="item in data.labels" :key="item.labelId" :label="item.labelName" :value="item.labelId" />
+        </el-select>
+        <el-input style="margin: 10px 0 10px 10px; width:200px" placeholder="搜索题目内容或关键词" v-model="search.content"
+            class="w-50 m-2" @keyup.esc="esc" @change="enter" @input="enter" :prefix-icon="Search" />
+
+        <!-- 只显示提醒问题 -->
+        <img :alt="data.msg" v-show="!data.newRemind && !search.remind" @click="filterTable" class="cell-hover"
+            src="../../assets/status2.png"
+            style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
+        <img :alt="data.msg" v-show="data.newRemind && !search.remind" @click="filterTable" class="cell-hover"
+            src="../../assets/status2_.png"
+            style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
+        <!-- 显示所有问题 -->
+        <img :alt="data.msg" v-show="search.remind" @click="filterTable" class="cell-hover" src="../../assets/all.png"
+            style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
+
+        <!-- 新增 -->
+        <img @click="data.dialogVisible = true" class="cell-hover" src="../../assets/add.png"
+            style="margin: 0 0 0 20px;width:20px;height: 20px;transform:translate(-20%,25%);" />
+
+        <!-- 随机一题 -->
+        <div style="float:right;margin:10px 0 10px 0; line-height: 35px;font-size:medium;">
+            <img class="cell-hover" src="../../assets/suiji.png"
+                style="border-radius: 50%;width:20px;height: 20px;transform:translate(-20%,20%);" />
+            <span class="cell-hover" style="text-align: center;display: inline;">随机一问</span>
+        </div>
+
+        <!-- 新增表单 -->
+        <el-dialog draggable :close-on-click-modal="false" v-model="data.dialogVisible" title="新增问题" center width="30%">
+            <el-input placeholder="输入问题" v-model="data.qa.ques"></el-input>
+            <el-select collapse-tags collapse-tags-tooltip :popper-append-to-body="false" :default-first-option="true"
+                v-model="data.qa.labelNames" multiple filterable allow-create placeholder="选择标签" autocomplete
+                style="margin-top: 40px;">
+                <el-option v-for="item in data.labels" :key="item.labelId" :label="item.labelName" :value="item.labelName">
+                </el-option>
+            </el-select>
+            <el-input :rows="10" type="textarea" placeholder="输入答案" v-model="data.qa.answer" style="margin-top: 40px;">
+            </el-input>
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="data.dialogVisible = false">取消</el-button>
+                    <el-button type="primary" @click="submit">
+                        确定
+                    </el-button>
+                </span>
+            </template>
+        </el-dialog>
+    </div>
 </template>
 
 <script lang="ts" setup>
@@ -197,12 +201,13 @@ onMounted(() => {
 
 </script>
 <style scoped>
-.cell-hover:hover {
-    cursor: pointer;
+.div-bar {
+    flex-grow: 1;
+    text-align: left;
+    /* overflow: overlay; */
 }
 
-.item {
-    margin-top: 10px;
-    margin-right: 40px;
+.cell-hover:hover {
+    cursor: pointer;
 }
 </style>
