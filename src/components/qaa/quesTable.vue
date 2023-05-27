@@ -1,7 +1,15 @@
 
 <template>
-    <QuesTableBar />
-    <el-table size="default" :data="data.tableData" :row-key="quesId" stripe >
+    <QaCarousel />
+
+    <!-- 分割线 -->
+    <el-divider />
+
+    <QuesPlan/>
+
+    <QuesSearchBar />
+
+    <el-table size="default" :data="data.tableData" :row-key="quesId" stripe>
         <el-table-column label="状态" width="90px">
             <template #default="scope">
                 <span v-if="scope.row.statusImgPath != 'null'">
@@ -102,16 +110,18 @@
     <!-- 修改对话框 -->
     <QaDialog />
     <!-- 分页 -->
-    <el-pagination background layout="sizes,->,prev, pager, next" style="margin-top:10px" :total="pagination.total"
-        :page-sizes="[20, 40, 60, 100]" :page-count="pagination.totalPage" :current-page="pagination.page" :page-size="pagination.limit"
-        @size-change="handleSizeChange" @current-change="pageChange" />
+    <el-pagination background layout="sizes,->,prev, pager, next" style="margin-top:20px" :total="pagination.total"
+        :page-sizes="[20, 40, 60, 100]" :page-count="pagination.totalPage" :current-page="pagination.page"
+        :page-size="pagination.limit" @size-change="handleSizeChange" @current-change="pageChange" />
 </template>
 <script lang="ts" setup>
 import { ref, unref, reactive, onMounted } from 'vue'
 import { service, bus } from "../../utils"
 import { Search } from '@element-plus/icons-vue'
-import QuesTableBar from './quesTableBar.vue'
+import QuesSearchBar from './quesSearchBar.vue'
 import QaDialog from './qaDialog.vue'
+import QaCarousel from './qaCarousel.vue'
+import QuesPlan from './quesPlan.vue'
 import { ElMessage } from 'element-plus'
 
 // 搜索条件
@@ -151,7 +161,7 @@ const pageChange = (p: number) => {
     loadData();
 }
 
-function handleSizeChange(val: number){
+function handleSizeChange(val: number) {
     pagination.limit = val;
     loadData();
 }
@@ -225,10 +235,10 @@ function loadData() {
         lastedReviewOn();
     }).catch(e => { })
 }
-function lastedReviewOn(){
-    service.get("qa/ques/lastedReviewOn").then((res)=>{
-        
-        bus.emit("newRemind",res.data.data);
+function lastedReviewOn() {
+    service.get("qa/ques/lastedReviewOn").then((res) => {
+
+        bus.emit("newRemind", res.data.data);
     })
 }
 
@@ -296,4 +306,5 @@ onMounted(() => {
     box-sizing: border-box;
 }
 
+/* 去掉eltable的hover效果 */
 </style>

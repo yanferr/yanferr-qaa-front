@@ -1,43 +1,60 @@
 <template>
     <div class="div-bar">
-        <!-- 搜索条件 -->
-        <el-select @change="difficultyChange" clearable v-model="search.difficulty" class="m-2" placeholder="难度"
-            style="width:75px;margin: 10px 0 10px 0">
-            <el-option v-for="item in data.difficulty" :key="item.value" :label="item.label" :value="item.value" />
-        </el-select>
-        <el-select @change="timeChange" clearable v-model="search.timeInterval" class="m-2" placeholder="时间"
-            style="margin: 10px 0 10px 10px;width:75px">
-            <el-option v-for="item in data.timeRange" :key="item.value" :label="item.label" :value="item.value" />
-        </el-select>
-        <el-select @change="labelChange" filterable clearable :collapse-tags="true" v-model="search.labelId" class="m-2"
-            placeholder="标签" style="margin: 10px 0 10px 10px; width:75px">
-            <el-option v-for="item in data.labels" :key="item.labelId" :label="item.labelName" :value="item.labelId" />
-        </el-select>
-        <el-input style="margin: 10px 0 10px 10px; width:200px" placeholder="搜索题目内容或关键词" v-model="search.content"
-            class="w-50 m-2" @keyup.esc="esc" @change="enter" @input="enter" :prefix-icon="Search" />
 
-        <!-- 只显示提醒问题 -->
-        <img :alt="data.msg" v-show="!data.newRemind && !search.remind" @click="filterTable" class="cell-hover"
-            src="../../assets/status2.png"
-            style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
-        <img :alt="data.msg" v-show="data.newRemind && !search.remind" @click="filterTable" class="cell-hover"
-            src="../../assets/status2_.png"
-            style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
-        <!-- 显示所有问题 -->
-        <img :alt="data.msg" v-show="search.remind" @click="filterTable" class="cell-hover" src="../../assets/all.png"
-            style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
+        <!-- 所有标签分类 -->
+        <div class="label-div">
+            <ul>
+                <li @click="labelClick(item.labelId, item.labelName)" class="cell-hover" v-for="item in labelQuesNums"
+                    :key="item.labelId">{{ item.labelName }}
+                    <span class="span-num"> {{ item.nums }}</span>
+                </li>
+            </ul>
 
-        <!-- 新增 -->
-        <img @click="data.dialogVisible = true" class="cell-hover" src="../../assets/add.png"
-            style="margin: 0 0 0 20px;width:20px;height: 20px;transform:translate(-20%,25%);" />
-
-        <!-- 随机一题 -->
-        <div style="float:right;margin:10px 0 10px 0; line-height: 35px;font-size:medium;">
-            <img class="cell-hover" src="../../assets/suiji.png"
-                style="border-radius: 50%;width:20px;height: 20px;transform:translate(-20%,20%);" />
-            <span class="cell-hover" style="text-align: center;display: inline;">随机一问</span>
+            <!-- <span class="cell-hover" style="padding-right: 20px; " v-for="item in labelQuesNums"
+                :key="item.labelId">{{ item.labelName }}
+                <span class="span-num">
+                    {{ item.nums }}</span>
+            </span> -->
         </div>
+        <div class="div-condition">
+            <!-- 搜索条件 -->
+            <el-select @change="difficultyChange" clearable v-model="search.difficulty" class="m-2" placeholder="难度"
+                style="width:75px;margin: 10px 0 10px 0">
+                <el-option v-for="item in data.difficulty" :key="item.value" :label="item.label" :value="item.value" />
+            </el-select>
+            <el-select @change="timeChange" clearable v-model="search.timeInterval" class="m-2" placeholder="时间"
+                style="margin: 10px 0 10px 10px;width:75px">
+                <el-option v-for="item in data.timeRange" :key="item.value" :label="item.label" :value="item.value" />
+            </el-select>
+            <el-select @change="labelChange" filterable clearable :collapse-tags="true" v-model="search.labelId" class="m-2"
+                placeholder="标签" style="margin: 10px 0 10px 10px; width:75px">
+                <el-option v-for="item in data.labels" :key="item.labelId" :label="item.labelName" :value="item.labelId" />
+            </el-select>
+            <el-input style="margin: 10px 0 10px 10px; width:200px" placeholder="搜索题目内容或关键词" v-model="search.content"
+                class="w-50 m-2" @keyup.esc="esc" @change="enter" @input="enter" :prefix-icon="Search" />
 
+            <!-- 只显示提醒问题 -->
+            <img :alt="data.msg" v-show="!data.newRemind && !search.remind" @click="filterTable" class="cell-hover"
+                src="../../assets/status2.png"
+                style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
+            <img :alt="data.msg" v-show="data.newRemind && !search.remind" @click="filterTable" class="cell-hover"
+                src="../../assets/status2_.png"
+                style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
+            <!-- 显示所有问题 -->
+            <img :alt="data.msg" v-show="search.remind" @click="filterTable" class="cell-hover" src="../../assets/all.png"
+                style="margin: 0 0 0 27px;width:20px;height: 20px;transform:translate(-20%,20%);" />
+
+            <!-- 新增 -->
+            <img @click="data.dialogVisible = true" class="cell-hover" src="../../assets/add.png"
+                style="margin: 0 0 0 20px;width:20px;height: 20px;transform:translate(-20%,25%);" />
+
+            <!-- 随机一题 -->
+            <div style="float:right;margin:10px 0 10px 0; line-height: 35px;font-size:medium;">
+                <img class="cell-hover" src="../../assets/suiji.png"
+                    style="border-radius: 50%;width:20px;height: 20px;transform:translate(-20%,20%);" />
+                <span class="cell-hover" style="text-align: center;display: inline;">随机一问</span>
+            </div>
+        </div>
         <!-- 新增表单 -->
         <el-dialog draggable :close-on-click-modal="false" v-model="data.dialogVisible" title="新增问题" center width="30%">
             <el-input placeholder="输入问题" v-model="data.qa.ques"></el-input>
@@ -66,6 +83,10 @@ import { ref, unref, reactive, onMounted } from 'vue'
 import { service, bus } from "../../utils"
 import { Search, Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+
+// 标签-问题数量
+let labelQuesNums = reactive([{ labelName: '', nums: '', labelId: '1' }])
+
 // 搜索条件
 let search = reactive({
     labelId: '',
@@ -105,6 +126,11 @@ let data = reactive({
     labels: [{ labelId: 0, labelName: '' }],
     qa: { labelNames: [], ques: '', answer: '' } // 新增
 })
+
+function labelClick(a: string, b: string) {
+    search.labelId = a;
+    labelChange();
+}
 
 // 监听搜索框esc按键
 function esc() {
@@ -178,6 +204,18 @@ function submit() {
 
 }
 
+// 标签-问题数量
+function loadLabelWithQuesNums() {
+    service.get('qa/queslabelrelation/labelQuesNums')
+        .then(res => {
+            if (res && res.data.code === 0) {
+                labelQuesNums = res.data.data;
+                // console.log(res.data.data);
+            } else {
+                alert("标签数据加载失败")
+            }
+        })
+}
 
 
 function loadLabels() {
@@ -193,6 +231,7 @@ function loadLabels() {
 onMounted(() => {
     // bus.emit('a', a)
     loadLabels();
+    loadLabelWithQuesNums();
     bus.on("newRemind", (flag) => {
         data.newRemind = flag;
     })
@@ -209,5 +248,32 @@ onMounted(() => {
 
 .cell-hover:hover {
     cursor: pointer;
+}
+
+.label-div {
+    clear:both;
+}
+
+.label-div ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+}
+
+.label-div ul li {
+    float: left;
+    margin: 0 20px 20px 0;
+}
+
+.span-num {
+    border-radius: 15px;
+    background-color: #f2f3f4;
+    color: #85858a;
+    padding: 0 5px 0 4px;
+    font-size: smaller;
+}
+.div-condition{
+    clear:both;
 }
 </style>
