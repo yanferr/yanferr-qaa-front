@@ -2,7 +2,7 @@
     <el-dialog  v-model="data.dialogVisible" title="查看&编辑" style="width: 700px;" draggable
         :close-on-click-modal="false">
         <template #header="{ titleId, titleClass }">
-            <h4 :id="titleId" :class="titleClass">查看&编辑
+            <h4 :id="titleId" :class="titleClass" style="text-align: left;">查看&编辑
                 <el-popconfirm confirm-button-text="删除" cancel-button-text="取消" :icon="InfoFilled" icon-color="#626AEF"
                     title="确定删除吗?" @confirm="deleteOne">
                     <template #reference>
@@ -54,10 +54,9 @@
             <el-form-item label="问题答案">
                 <el-input :rows="10" v-model="form.qa.answer.answer" type="textarea" />
             </el-form-item>
-            <el-form-item>
+            <el-form-item >
                 <el-button @click="data.dialogVisible = false">取消</el-button>
                 <el-button type="warning" @click="onSubmit">修改</el-button>
-
             </el-form-item>
         </el-form>
     </el-dialog>

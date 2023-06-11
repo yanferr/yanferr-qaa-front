@@ -1,15 +1,31 @@
 <template>
     <div class="div-bar">
-
         <!-- 所有标签分类 -->
-        <div class="label-div">
+        <div :class="expand.show ? 'label-div-expand' : 'label-div'" class="label-classfication">
+            <!-- 是否展开选项 -->
+            <span class="cell-hover" style="color:#8a8a8e; right: 0; top: 0;position: absolute;z-index: 3;"
+                v-show="!expand.show" @click="expand.show = !expand.show;">展开
+                <el-icon>
+                    <ArrowDown />
+                </el-icon>
+            </span>
+
             <ul>
                 <li @click="labelClick(item.labelId, item.labelName)" class="cell-hover" v-for="item in labelQuesNums"
                     :key="item.labelId">{{ item.labelName }}
                     <span class="span-num"> {{ item.nums }}</span>
                 </li>
+                
+                
             </ul>
-
+            
+            <!-- 是否展开选项 -->
+            <span class="cell-hover" v-show="expand.show" style="float:right;color:#8a8a8e;"
+                @click="expand.show = !expand.show;">收起
+                <el-icon>
+                    <ArrowUp />
+                </el-icon>
+            </span>
             <!-- <span class="cell-hover" style="padding-right: 20px; " v-for="item in labelQuesNums"
                 :key="item.labelId">{{ item.labelName }}
                 <span class="span-num">
@@ -81,12 +97,15 @@
 <script lang="ts" setup>
 import { ref, unref, reactive, onMounted } from 'vue'
 import { service, bus } from "../../utils"
-import { Search, Plus } from '@element-plus/icons-vue'
+import { Search, Plus, ArrowUp, ArrowDown } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 // 标签-问题数量
 let labelQuesNums = reactive([{ labelName: '', nums: '', labelId: '1' }])
-
+// 是否展开
+let expand = reactive({
+    show: false,
+})
 // 搜索条件
 let search = reactive({
     labelId: '',
@@ -126,6 +145,7 @@ let data = reactive({
     labels: [{ labelId: 0, labelName: '' }],
     qa: { labelNames: [], ques: '', answer: '' } // 新增
 })
+
 
 function labelClick(a: string, b: string) {
     search.labelId = a;
@@ -251,17 +271,38 @@ onMounted(() => {
 }
 
 .label-div {
-    clear:both;
+
+    display: inline-block;
+    max-width: 99%;
+    /* 根据需要设置宽度限制 */
+    position: relative;
+    z-index: 1;
+    line-height: 1.2;
+    /* 设置合适的行高 */
+    max-height: 1.2em;
+    /* 限制高度为一行文本 */
+    overflow: hidden;
+    /* 隐藏超出部分 */
 }
 
-.label-div ul {
+
+.label-div-expand {
+    overflow: visible;
+}
+
+.label-classfication {
+    position: relative;
+    display: inline-block;
+}
+
+.label-classfication ul {
     list-style: none;
     margin: 0;
     padding: 0;
 
 }
 
-.label-div ul li {
+.label-classfication ul li {
     float: left;
     margin: 0 20px 20px 0;
 }
@@ -273,7 +314,8 @@ onMounted(() => {
     padding: 0 5px 0 4px;
     font-size: smaller;
 }
-.div-condition{
-    clear:both;
+
+.div-condition {
+    clear: both;
 }
 </style>
