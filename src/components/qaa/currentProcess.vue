@@ -120,17 +120,6 @@ circle:nth-child(1) {
     /* 282.6 = 2 * PI * 45 */
 }
 
-
-.stat-item {
-    font-size: 14px;
-    margin-right: 8px;
-    text-align: center;
-}
-
-.stat-item:last-child {
-    margin-right: 0;
-}
-
 /* ... */
 .stats {
     position: absolute;
