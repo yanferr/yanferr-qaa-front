@@ -15,28 +15,28 @@
                 </svg>
 
                 <div class="stats">
-                    <div class="stat-item">
+                    <div class="stat-item" >
                         <span class="label">全部</span>
                         <span class="value solved-count">-</span>
                     </div>
                     <div class="stat-item">
-                        <span class="label">-------</span>
+                        <!-- <span class="label">-------</span> -->
                         <span class="value total-count">-</span>
                     </div>
-                    <div class="progress-percentage">-</div>
+                    <!-- <div class="progress-percentage">-</div> -->
                 </div>
             </div>
             <div class="section">
-                <div class="upper-part">上半部分内容</div>
-                <div class="lower-part">下半部分内容</div>
+                <div class="upper-part">简单</div>
+                <div class="lower-part">350</div>
             </div>
             <div class="section">
-                <div class="upper-part">上半部分内容</div>
-                <div class="lower-part">下半部分内容</div>
+                <div class="upper-part">中等</div>
+                <div class="lower-part">260</div>
             </div>
             <div class="section">
-                <div class="upper-part">上半部分内容</div>
-                <div class="lower-part">下半部分内容</div>
+                <div class="upper-part">困难</div>
+                <div class="lower-part">110</div>
             </div>
         </div>
 
@@ -60,7 +60,7 @@ onMounted(() => {
 
         document.querySelector('.solved-count').innerText = solvedCount;
         document.querySelector('.total-count').innerText = totalCount;
-        document.querySelector('.progress-percentage').innerText = `${Math.round(progressPercentage)}%`;
+        // document.querySelector('.progress-percentage').innerText = `${Math.round(progressPercentage)}%`;
         document.querySelector('.progress-circle').style.strokeDasharray = `${progressLength}, ${circleLength}`;
     });
 })
@@ -73,10 +73,9 @@ onMounted(() => {
 }
 
 .progress-panel {
-    margin: 30px 0 0 30px;
-    width: 400px;
+    margin: 10% 0 0 10%;
+    width: 90%;
     background-color: #fff;
-    padding: 20px;
     border-radius: 5px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     display: flex;
@@ -89,24 +88,20 @@ h2 {
     margin: 0 0 15px;
 }
 
-.label {
-    color: #888;
-}
 
 .value {
     font-weight: bold;
 }
 
 .circle-progress {
-    width: 300px;
-    height: 200px;
+    width: 200px;
     position: relative;
 }
 
 
 svg {
-    width: 100%;
-    height: 100%;
+    width: 100px;
+    height: 100px;
     transform: rotate(-90deg);
 }
 
@@ -129,6 +124,7 @@ circle:nth-child(1) {
 .stat-item {
     font-size: 14px;
     margin-right: 8px;
+    text-align: center;
 }
 
 .stat-item:last-child {
@@ -158,16 +154,16 @@ circle:nth-child(1) {
 .label {
     display: block;
     color: #888;
-    font-size: 12px;
+    font-size: 6px;
 }
 
 .value {
-    font-weight: bold;
-    font-size: 16px;
+    font-size: 12px;
 }
 
 .solved-count {
-    font-size: 25px;
+    font-weight: bold;
+    font-size: 19px;
 }
 
 .progress-percentage {
