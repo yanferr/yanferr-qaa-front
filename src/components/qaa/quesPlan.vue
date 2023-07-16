@@ -2,7 +2,7 @@
     <div class="div-plan-header">
         <el-row>
             <el-col :span="12">
-                <h3 style="margin-bottom: 20px;width: 80px;">问题计划</h3>
+                <h3 style="margin-bottom: 20px;width: 80px;">计划推荐</h3>
             </el-col>
             <el-col :span="12"><span class="cell-hover" style="float:right;margin-right: 20px;">查看更多</span></el-col>
         </el-row>

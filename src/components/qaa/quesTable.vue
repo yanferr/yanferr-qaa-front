@@ -1,11 +1,10 @@
 
 <template>
-    <QaCarousel />
+    <!-- <QaCarousel />
 
-    <!-- 分割线 -->
     <el-divider />
 
-    <QuesPlan/>
+    <QuesPlan/> -->
 
     <QuesSearchBar />
 

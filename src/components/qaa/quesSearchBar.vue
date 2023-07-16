@@ -263,6 +263,7 @@ onMounted(() => {
 .div-bar {
     flex-grow: 1;
     text-align: left;
+    margin-top: 20px;
     /* overflow: overlay; */
 }
 

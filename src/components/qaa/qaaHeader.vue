@@ -12,8 +12,8 @@
             </el-col> -->
             <el-col :xs="21" :sm="21" :md="20" :lg="12" :xl="12">
                 <span><img style="height: 30px;transform:translate(20%,24%);" src="../../assets/yanferr.png" /></span>
-                <span class="header-row-hover" style="margin-left:30px">学习</span>
-                <span class="header-row-hover" style="margin-left:30px">题库</span>
+                <span class="header-row-hover" style="margin-left:30px"> <router-link to="/">记录</router-link></span>
+                <span class="header-row-hover" style="margin-left:30px"> <router-link to="/task">任务</router-link></span>
                 <span class="header-row-hover" style="margin-left:30px">竞赛</span>
                 <span class="header-row-hover" style="margin-left:30px">讨论</span>
                 <span class="header-row-hover" style="margin-left:30px">求职</span>
@@ -54,8 +54,26 @@
     box-shadow: 0px 0.5px 4px rgba(0, 0, 0, 0.2), 0px 0px 50px rgb(255, 255, 255) inset;
 }
 
+a.router-link-active {
+  color: inherit;
+  text-decoration: none;
+}
+a.router-link-active:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+a, .green {
+  color: #5c5c63;
+}
+
+
 .header-row-hover:hover {
     color: black;
     cursor: pointer;
+    background-color: transparent;
+}
+a:hover {
+  background-color: transparent;
 }
 </style>
