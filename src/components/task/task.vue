@@ -22,6 +22,7 @@ import { componentSizeMap, ElMessage } from 'element-plus'
 
 let data = reactive({
   task: '',
+  taskId: null,
   changeTime: new Date(),
   hasChanged: false,
 })
@@ -32,21 +33,55 @@ function handleChange() {
 
 // 定时任务:每60s检测输入框是否发生了变化
 const intervalId = setInterval(() => {
-  if (data.hasChanged) {
+  
+  if (data.hasChanged ) {
     // 执行自动保存
     console.log("内容发生变化,执行自动保存...");
+    autoSave();
     data.hasChanged = false;
   }
 
-}, 30000);
+}, 10000);
 
-function autoSave(){
-  
+function loadRecentTasks() {
+  service.get('qa/task/recent')
+    .then(res => {
+      if (res && res.data.code === 0) {
+        // labelQuesNums = res.data.data;
+        console.log(res.data.tasks)
+        data.task = res.data.tasks.task;
+        data.taskId = res.data.tasks.taskId;
+      } else {
+        ElMessage.error('数据加载失败')
+      }
+    })
 }
+
+function autoSave() {
+  service.post('qa/task/save', {
+    taskId: data.taskId,
+    task: data.task
+  }).then(res => { // 必须要用箭头函数
+    console.log(res);
+    if (res && res.data.code === 0) {
+      data.taskId = res.data.taskId;
+    } else {
+      ElMessage.error('自动保存失败！请检查网络连接')
+    }
+  }).catch(function (error) {
+    ElMessage.error('自动保存失败！请检查网络连接')
+  });
+}
+
+onMounted(() => {
+    // bus.emit('a', a)
+    loadRecentTasks();
+})
+
 
 onUnmounted(() => {
   clearInterval(intervalId);
-  
+  autoSave();
 });
 </script>
 
